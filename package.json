@@ -1,0 +1,44 @@
+{
+  "name": "llm-local-chat",
+  "displayName": "llm-local-chat",
+  "description": "local llm vs extension",
+  "version": "1.0.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://"
+  },
+  "engines": {
+    "vscode": "^1.96.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [],
+  "main": "./src/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "llm-local-chat.openChat",
+        "title": "openchat"
+      }
+    ]
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "pretest": "npm run lint",
+    "test": "vscode-test",
+    "pack-extension": "vsce package",
+    "download-model": "ollama run qwen3:14b"
+  },
+  "devDependencies": {
+    "@types/mocha": "^10.0.10",
+    "@types/node": "20.x",
+    "@types/vscode": "^1.96.0",
+    "@vscode/test-cli": "^0.0.10",
+    "@vscode/test-electron": "^2.4.1",
+    "eslint": "^8.57.1"
+  },
+  "dependencies": {
+    "ollama": "^0.5.12"
+  }
+}
