@@ -3,7 +3,7 @@ const ollama = require('ollama');
 const { getHtmlForChatWebview } = require('./main-chat-frame');
 
 function activate(context) {
-    const disposable = vscode.commands.registerCommand('llm-local-chat.openChat', function () {
+    const disposable = vscode.commands.registerCommand('llm-local-chat.openLLMWindow', function () {
         const panel = vscode.window.createWebviewPanel(
             'llmChat',
             'LLM Local Chat',
@@ -30,35 +30,48 @@ function activate(context) {
                         content: userPrompt
                     }
                 });
+
+                panel.webview.postMessage({
+                    type: 'addMessage',
+                    message: { 
+                        role: 'assistant', 
+                        content: 'LLM analizuje' 
+                    }
+                });
+                const stopThinking = startThinkingAnimation(panel);
 		
                 try {
                     const streamRes = await ollama.default.chat({
-                        model: 'qwen3:14b',
+                        model: 'qwen3-coder:30b',
                         messages: [{ role: 'user', content: userPrompt }],
                         stream: true
                     });
 
-                    panel.webview.postMessage({
-                        type: 'addMessage',
-                        message: {
-                            role: 'assistant',
-                            content: '...'
-                        }
-                    });
-		
+                    stopThinking();
+
                     for await (const part of streamRes) {
                         responseText += part.message.content;
 
                         const now = Date.now();
                         if (now - lastUpdateTime > updateInterval) {
-                            panel.webview.postMessage({ type: 'updateLastMessage', content: responseText });
+                            panel.webview.postMessage({ 
+                                type: 'updateLastMessage', 
+                                content: responseText 
+                            });
                             lastUpdateTime = now;
                         }
                     }
 
-                    panel.webview.postMessage({ type: 'updateLastMessage', content: responseText });
+                    panel.webview.postMessage({ 
+                        type: 'updateLastMessage', 
+                        content: responseText 
+                    });
                 } catch (err) {
-                    panel.webview.postMessage({ type: 'response', content: `Error: ${String(err)}` });
+                    stopThinking();
+                    panel.webview.postMessage({ 
+                        type: 'response', 
+                        content: `Error: ${String(err)}` 
+                    });
                 }
             }
         });
@@ -69,11 +82,19 @@ function activate(context) {
     context.subscriptions.push(disposable);
 }
 
-function deactivate() {
-	
+function startThinkingAnimation(panel) {
+    let dots = 0;
+    const interval = setInterval(() => {
+        dots = (dots+1) % 4;
+        panel.webview.postMessage({
+            type: 'updateLastMessage',
+            content: 'LLM analizuje' + '.'.repeat(dots)
+        });
+    }, 400);
+
+    return () => clearInterval(interval);
 }
 
 module.exports = {
     activate,
-    deactivate
 };
