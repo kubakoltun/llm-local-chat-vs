@@ -29,7 +29,8 @@
         "eslint": "eslint .",
         "test": "vscode-test",
         "pack-extension": "vsce package",
-        "download-model": "ollama run qwen3-coder:30b"
+        "start-ollama": "ollama serve",
+        "download-model": "ollama serve && ollama pull gemma4:31b"
     },
     "devDependencies": {
         "@types/mocha": "^10.0.10",
